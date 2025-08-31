@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZZX小游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .intro {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .game-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .game-icon {
+            height: 180px;
+            background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: #6a11cb;
+        }
+        
+        .game-info {
+            padding: 1.5rem;
+        }
+        
+        .game-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .game-description {
+            color: #666;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .play-btn {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: opacity 0.3s;
+        }
+        
+        .play-btn:hover {
+            opacity: 0.9;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: #333;
+            color: #fff;
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">ZZX小游戏</div>
+        <div class="subtitle">作者：ZZX | 经典游戏合集</div>
+    </header>
+    
+    <div class="container">
+        <div class="intro">
+            <h2>欢迎来到ZZX小游戏合集</h2>
+            <p>这里收集了一些经典的小游戏，点击下方游戏卡片开始游玩吧！</p>
+        </div>
+        
+        <div class="games-grid">
+            <!-- 贪吃蛇游戏卡片 -->
+            <div class="game-card">
+                <div class="game-icon">🐍</div>
+                <div class="game-info">
+                    <h3 class="game-title">贪吃蛇</h3>
+                    <p class="game-description">控制小蛇吃掉食物，让它变得越来越长。小心不要撞到墙壁或自己的身体！</p>
+                    <a href="snake/index.html" class="play-btn">开始游戏</a>
+                </div>
+            </div>
+            
+            <!-- 俄罗斯方块游戏卡片 -->
+            <div class="game-card">
+                <div class="game-icon">🧊</div>
+                <div class="game-info">
+                    <h3 class="game-title">俄罗斯方块</h3>
+                    <p class="game-description">移动和旋转下落的方块，完成水平行以消除它们。不要让方块堆到顶部！</p>
+                    <a href="tetris/index.html" class="play-btn">开始游戏</a>
+                </div>
+            </div>
+            
+            <!-- 扫雷游戏卡片 -->
+            <div class="game-card">
+                <div class="game-icon">💣</div>
+                <div class="game-info">
+                    <h3 class="game-title">扫雷</h3>
+                    <p class="game-description">根据数字提示找出所有地雷的位置。考验你的逻辑推理能力！</p>
+                    <a href="minesweeper/index.html" class="play-btn">开始游戏</a>
+                </div>
+            </div>
+            
+            <!-- 吃豆人游戏卡片 -->
+            <div class="game-card">
+                <div class="game-icon">👻</div>
+                <div class="game-info">
+                    <h3 class="game-title">吃豆人</h3>
+                    <p class="game-description">控制吃豆人在迷宫中吃掉所有豆子，同时避开幽灵的追捕！</p>
+                    <a href="pacman/index.html" class="play-btn">开始游戏</a>
+                </div>
+            </div>
+            
+            <!-- 打飞机游戏卡片 -->
+            <div class="game-card">
+                <div class="game-icon">✈️</div>
+                <div class="game-info">
+                    <h3 class="game-title">打飞机</h3>
+                    <p class="game-description">控制你的战斗机躲避敌人攻击并消灭敌机，获得高分！</p>
+                    <a href="airplane/index.html" class="play-btn">开始游戏</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2025 ZZX小游戏 | 作者：ZZX | 所有游戏版权归原作者所有</p>
+    </footer>
+</body>
+</html>
