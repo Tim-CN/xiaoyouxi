@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>吃豆人 - ZZX小游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .game-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            border-radius: 4px;
+            color: white;
+        }
+        
+        .score-container, .lives-container, .level-container {
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .score-container::before {
+            content: '🏆';
+            margin-right: 0.5rem;
+        }
+        
+        .lives-container::before {
+            content: '❤️';
+            margin-right: 0.5rem;
+        }
+        
+        .level-container::before {
+            content: '🚩';
+            margin-right: 0.5rem;
+        }
+        
+        #game-canvas {
+            border: 2px solid #6a11cb;
+            border-radius: 4px;
+            background-color: #000;
+            display: block;
+            margin: 0 auto;
+            image-rendering: pixelated;
+        }
+        
+        .controls {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1.5rem;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .mobile-controls {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+            margin-top: 1rem;
+            max-width: 150px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .mobile-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(106, 17, 203, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .mobile-btn:active {
+            background: rgba(37, 117, 252, 0.9);
+        }
+        
+        .up-btn {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        
+        .left-btn {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        
+        .right-btn {
+            grid-column: 3;
+            grid-row: 2;
+        }
+        
+        .down-btn {
+            grid-column: 2;
+            grid-row: 3;
+        }
+        
+        .instructions {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 0.5rem;
+            color: #6a11cb;
+        }
+        
+        .instructions ul {
+            list-style-position: inside;
+            padding-left: 1rem;
+        }
+        
+        .instructions li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .key-bindings {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .key {
+            background: #ddd;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.5rem 1.5rem;
+            background: #666;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #555;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: #333;
+            color: #fff;
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            #game-canvas {
+                width: 100%;
+                height: auto;
+            }
+            
+            .mobile-controls {
+                display: grid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">吃豆人游戏</div>
+        <div class="subtitle">ZZX小游戏合集</div>
+    </header>
+    
+    <div class="container">
+        <div class="game-container">
+            <div class="game-header">
+                <div class="score-container">分数: <span id="score">0</span></div>
+                <div class="lives-container">生命: <span id="lives">3</span></div>
+                <div class="level-container">关卡: <span id="level">1</span></div>
+            </div>
+            
+            <canvas id="game-canvas" width="448" height="496"></canvas>
+            
+            <div class="mobile-controls">
+                <button class="mobile-btn up-btn">↑</button>
+                <button class="mobile-btn left-btn">←</button>
+                <button class="mobile-btn right-btn">→</button>
+                <button class="mobile-btn down-btn">↓</button>
+            </div>
+            
+            <div class="controls">
+                <button id="start-btn" class="btn">开始游戏</button>
+                <button id="pause-btn" class="btn" disabled>暂停</button>
+                <button id="reset-btn" class="btn">重新开始</button>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>游戏说明:</h3>
+            <ul>
+                <li>使用方向键或WASD控制吃豆人移动</li>
+                <li>吃掉所有豆子即可通关</li>
+                <li>避开幽灵，否则会失去生命</li>
+                <li>吃掉大力丸后可以暂时吃掉幽灵</li>
+                <li>每关难度会增加</li>
+                <li>获得高分进入排行榜!</li>
+            </ul>
+            
+            <div class="key-bindings">
+                <div class="key">←/→/↑/↓</div>
+                <div>移动吃豆人</div>
+                <div class="key">W/A/S/D</div>
+                <div>移动吃豆人</div>
+                <div class="key">P</div>
+                <div>暂停/继续</div>
+                <div class="key">空格键</div>
+                <div>开始游戏</div>
+            </div>
+        </div>
+        
+        <a href="../小游戏.html" class="back-btn">返回游戏大厅</a>
+    </div>
+    
+    <footer>
+        <p>© 2025 ZZX小游戏 | 作者：ZZX | 所有游戏版权归原作者所有</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('game-canvas');
+            const ctx = canvas.getContext('2d');
+            const scoreElement = document.getElementById('score');
+            const livesElement = document.getElementById('lives');
+            const levelElement = document.getElementById('level');
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const upBtn = document.querySelector('.up-btn');
+            const downBtn = document.querySelector('.down-btn');
+            const leftBtn = document.querySelector('.left-btn');
+            const rightBtn = document.querySelector('.right-btn');
+            
+            // 游戏配置
+            const CELL_SIZE = 16;
+            const GRID_WIDTH = 28;
+            const GRID_HEIGHT = 31;
+            const PACMAN_SPEED = 2;
+            const GHOST_SPEED = 1.5;
+            const POWER_PELLET_DURATION = 300; // 大力丸效果持续时间（帧数）
+            
+            // 地图定义 (0: 空, 1: 墙, 2: 豆子, 3: 大力丸, 4: 幽灵出生点, 5: 吃豆人出生点)
+            const levelMap = [
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+                [1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1],
+                [1, 3, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 3, 1],
+                [1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1],
+                [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+                [1, 2, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 2, 1],
+                [1, 2, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 2, 1],
+                [1, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 1],
+                [1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 1, 2, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 2, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 1, 2, 1, 1, 0, 1, 1, 1, 4, 4, 1, 1, 1, 0, 1, 1, 2, 1, 0, 0, 0, 0, 0],
+                [1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 2, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0],
+                [1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 2, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 1, 2, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 2, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 1, 2, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 2, 1, 0, 0, 0, 0, 0],
+                [1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 2, 1, 1, 1, 1, 1, 1],
+                [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+                [1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1],
+                [1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1],
+                [1, 3, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 5, 0, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 3, 1],
+                [1, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1],
+                [1, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1],
+                [1, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 1],
+                [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1],
+                [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1],
+                [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+            ];
+            
+            // 游戏状态
+            let map = [];
+            let pacman = {
+                x: 0,
+                y: 0,
+                direction: 'right',
+                nextDirection: 'right',
+                mouthOpen: true,
+                mouthAngle: 0
+            };
+            let ghosts = [];
+            let dots = 0;
+            let score = 0;
+            let lives = 3;
+            let level = 1;
+            let powerPelletActive = false;
+            let powerPelletTimer = 0;
+            let gameRunning = false;
+            let gameOver = false;
+            let animationFrameId = null;
+            
+            // 初始化游戏
+            function initGame() {
+                // 重置游戏状态
+                score = 0;
+                lives = 3;
+                level = 1;
+                powerPelletActive = false;
+                powerPelletTimer = 0;
+                gameRunning = false;
+                gameOver = false;
+                
+                // 更新显示
+                scoreElement.textContent = score;
+                livesElement.textContent = lives;
+                levelElement.textContent = level;
+                
+                // 初始化地图
+                loadLevel();
+                
+                // 绘制初始状态
+                draw();
+                
+                // 启用开始按钮
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+            }
+            
+            // 加载关卡
+            function loadLevel() {
+                // 复制地图
+                map = JSON.parse(JSON.stringify(levelMap));
+                dots = 0;
+                
+                // 计算豆子数量并找到吃豆人和幽灵的初始位置
+                let pacmanSpawn = null;
+                let ghostSpawns = [];
+                
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x < GRID_WIDTH; x++) {
+                        if (map[y][x] === 2 || map[y][x] === 3) {
+                            dots++;
+                        } else if (map[y][x] === 5) {
+                            pacmanSpawn = { x, y };
+                            map[y][x] = 0; // 清空吃豆人出生点
+                        } else if (map[y][x] === 4) {
+                            ghostSpawns.push({ x, y });
+                            map[y][x] = 0; // 清空幽灵出生点
+                        }
+                    }
+                }
+                
+                // 设置吃豆人位置
+                if (pacmanSpawn) {
+                    pacman.x = pacmanSpawn.x;
+                    pacman.y = pacmanSpawn.y;
+                }
+                
+                // 创建幽灵
+                ghosts = [];
+                const ghostColors = ['#FF0000', '#FFB8FF', '#00FFFF', '#FFB852'];
+                const ghostNames = ['Blinky', 'Pinky', 'Inky', 'Clyde'];
+                
+                for (let i = 0; i < Math.min(ghostSpawns.length, 4); i++) {
+                    ghosts.push({
+                        x: ghostSpawns[i].x,
+                        y: ghostSpawns[i].y,
+                        color: ghostColors[i],
+                        name: ghostNames[i],
+                        direction: 'left',
+                        speed: GHOST_SPEED + (level * 0.1),
+                        isScared: false
+                    });
+                }
+            }
+            
+            // 绘制游戏
+            function draw() {
+                // 清空画布
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制地图
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x < GRID_WIDTH; x++) {
+                        const cell = map[y][x];
+                        const px = x * CELL_SIZE;
+                        const py = y * CELL_SIZE;
+                        
+                        if (cell === 1) {
+                            // 墙
+                            ctx.fillStyle = '#2233AA';
+                            ctx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
+                        } else if (cell === 2) {
+                            // 豆子
+                            ctx.fillStyle = '#FFF';
+                            ctx.beginPath();
+                            ctx.arc(px + CELL_SIZE / 2, py + CELL_SIZE / 2, 2, 0, Math.PI * 2);
+                            ctx.fill();
+                        } else if (cell === 3) {
+                            // 大力丸
+                            ctx.fillStyle = '#FFF';
+                            ctx.beginPath();
+                            ctx.arc(px + CELL_SIZE / 2, py + CELL_SIZE / 2, 5, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                }
+                
+                // 绘制吃豆人
+                drawPacman();
+                
+                // 绘制幽灵
+                drawGhosts();
+            }
+            
+            // 绘制吃豆人
+            function drawPacman() {
+                const px = pacman.x * CELL_SIZE;
+                const py = pacman.y * CELL_SIZE;
+                
+                ctx.fillStyle = '#FF0';
+                ctx.beginPath();
+                
+                // 根据嘴巴开合状态计算角度
+                const angle = pacman.mouthOpen ? Math.PI / 4 : 0;
+                let startAngle, endAngle;
+                
+                switch (pacman.direction) {
+                    case 'right':
+                        startAngle = angle;
+                        endAngle = Math.PI * 2 - angle;
+                        break;
+                    case 'left':
+                        startAngle = Math.PI + angle;
+                        endAngle = Math.PI - angle;
+                        break;
+                    case 'up':
+                        startAngle = Math.PI * 1.5 + angle;
+                        endAngle = Math.PI * 1.5 - angle;
+                        break;
+                    case 'down':
+                        startAngle = Math.PI * 0.5 + angle;
+                        endAngle = Math.PI * 0.5 - angle;
+                        break;
+                }
+                
+                ctx.arc(
+                    px + CELL_SIZE / 2,
+                    py + CELL_SIZE / 2,
+                    CELL_SIZE / 2,
+                    startAngle,
+                    endAngle
+                );
+                ctx.lineTo(px + CELL_SIZE / 2, py + CELL_SIZE / 2);
+                ctx.fill();
+            }
+            
+            // 绘制幽灵
+            function drawGhosts() {
+                for (const ghost of ghosts) {
+                    const px = ghost.x * CELL_SIZE;
+                    const py = ghost.y * CELL_SIZE;
+                    
+                    // 绘制幽灵身体
+                    ctx.fillStyle = ghost.isScared ? '#00F' : ghost.color;
+                    
+                    // 幽灵身体（半圆+矩形）
+                    ctx.beginPath();
+                    ctx.arc(px + CELL_SIZE / 2, py + CELL_SIZE / 2, CELL_SIZE / 2, Math.PI, Math.PI * 2);
+                    ctx.lineTo(px + CELL_SIZE, py + CELL_SIZE);
+                    ctx.lineTo(px, py + CELL_SIZE);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // 绘制幽灵眼睛
+                    ctx.fillStyle = '#FFF';
+                    ctx.beginPath();
+                    ctx.arc(px + CELL_SIZE / 3, py + CELL_SIZE / 2.5, CELL_SIZE / 6, 0, Math.PI * 2);
+                    ctx.arc(px + CELL_SIZE * 2/3, py + CELL_SIZE / 2.5, CELL_SIZE / 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // 绘制幽灵眼球
+                    ctx.fillStyle = '#000';
+                    let eyeOffsetX = 0;
+                    let eyeOffsetY = 0;
+                    
+                    switch (ghost.direction) {
+                        case 'left': eyeOffsetX = -2; break;
+                        case 'right': eyeOffsetX = 2; break;
+                        case 'up': eyeOffsetY = -2; break;
+                        case 'down': eyeOffsetY = 2; break;
+                    }
+                    
+                    ctx.beginPath();
+                    ctx.arc(px + CELL_SIZE / 3 + eyeOffsetX, py + CELL_SIZE / 2.5 + eyeOffsetY, CELL_SIZE / 12, 0, Math.PI * 2);
+                    ctx.arc(px + CELL_SIZE * 2/3 + eyeOffsetX, py + CELL_SIZE / 2.5 + eyeOffsetY, CELL_SIZE / 12, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // 更新游戏状态
+            function update() {
+                if (!gameRunning || gameOver) return;
+                
+                // 移动吃豆人
+                movePacman();
+                
+                // 移动幽灵
+                moveGhosts();
+                
+                // 检查碰撞
+                checkCollisions();
+                
+                // 更新嘴巴动画
+                pacman.mouthOpen = !pacman.mouthOpen;
+                
+                // 更新大力丸计时器
+                if (powerPelletActive) {
+                    powerPelletTimer--;
+                    if (powerPelletTimer <= 0) {
+                        powerPelletActive = false;
+                        for (const ghost of ghosts) {
+                            ghost.isScared = false;
+                        }
+                    }
+                }
+                
+                // 绘制游戏
+                draw();
+                
+                // 继续游戏循环
+                if (gameRunning) {
+                    animationFrameId = requestAnimationFrame(update);
+                }
+            }
+            
+            // 移动吃豆人
+            function movePacman() {
+                // 尝试改变方向
+                if (pacman.nextDirection !== pacman.direction) {
+                    if (canMove(pacman.x, pacman.y, pacman.nextDirection)) {
+                        pacman.direction = pacman.nextDirection;
+                    }
+                }
+                
+                // 移动吃豆人
+                if (canMove(pacman.x, pacman.y, pacman.direction)) {
+                    switch (pacman.direction) {
+                        case 'left': pacman.x -= PACMAN_SPEED / CELL_SIZE; break;
+                        case 'right': pacman.x += PACMAN_SPEED / CELL_SIZE; break;
+                        case 'up': pacman.y -= PACMAN_SPEED / CELL_SIZE; break;
+                        case 'down': pacman.y += PACMAN_SPEED / CELL_SIZE; break;
+                    }
+                    
+                    // 处理隧道
+                    if (pacman.x < 0) pacman.x = GRID_WIDTH - 1;
+                    if (pacman.x >= GRID_WIDTH) pacman.x = 0;
+                    
+                    // 检查是否吃到豆子
+                    checkDotCollision();
+                }
+            }
+            
+            // 移动幽灵
+            function moveGhosts() {
+                for (const ghost of ghosts) {
+                    // 简单AI：随机移动，但不会反向
+                    const directions = ['up', 'down', 'left', 'right'];
+                    const possibleDirections = [];
+                    
+                    for (const dir of directions) {
+                        // 避免反向移动
+                        if ((dir === 'left' && ghost.direction === 'right') ||
+                            (dir === 'right' && ghost.direction === 'left') ||
+                            (dir === 'up' && ghost.direction === 'down') ||
+                            (dir === 'down' && ghost.direction === 'up')) {
+                            continue;
+                        }
+                        
+                        if (canMove(ghost.x, ghost.y, dir)) {
+                            possibleDirections.push(dir);
+                        }
+                    }
+                    
+                    if (possibleDirections.length > 0) {
+                        // 随机选择方向
+                        const randomIndex = Math.floor(Math.random() * possibleDirections.length);
+                        ghost.direction = possibleDirections[randomIndex];
+                    }
+                    
+                    // 移动幽灵
+                    switch (ghost.direction) {
+                        case 'left': ghost.x -= ghost.speed / CELL_SIZE; break;
+                        case 'right': ghost.x += ghost.speed / CELL_SIZE; break;
+                        case 'up': ghost.y -= ghost.speed / CELL_SIZE; break;
+                        case 'down': ghost.y += ghost.speed / CELL_SIZE; break;
+                    }
+                    
+                    // 处理隧道
+                    if (ghost.x < 0) ghost.x = GRID_WIDTH - 1;
+                    if (ghost.x >= GRID_WIDTH) ghost.x = 0;
+                }
+            }
+            
+            // 检查是否可以移动
+            function canMove(x, y, direction) {
+                let testX = Math.round(x);
+                let testY = Math.round(y);
+                
+                // 根据方向调整检测点
+                switch (direction) {
+                    case 'left': testX -= 1; break;
+                    case 'right': testX += 1; break;
+                    case 'up': testY -= 1; break;
+                    case 'down': testY += 1; break;
+                }
+                
+                // 边界检查
+                if (testX < 0 || testX >= GRID_WIDTH || testY < 0 || testY >= GRID_HEIGHT) {
+                    return true; // 允许进入隧道
+                }
+                
+                // 墙壁检查
+                return map[testY][testX] !== 1;
+            }
+            
+            // 检查豆子碰撞
+            function checkDotCollision() {
+                const gridX = Math.round(pacman.x);
+                const gridY = Math.round(pacman.y);
+                
+                if (gridX >= 0 && gridX < GRID_WIDTH && gridY >= 0 && gridY < GRID_HEIGHT) {
+                    if (map[gridY][gridX] === 2) {
+                        // 吃到豆子
+                        map[gridY][gridX] = 0;
+                        score += 10;
+                        dots--;
+                        scoreElement.textContent = score;
+                    } else if (map[gridY][gridX] === 3) {
+                        // 吃到大力丸
+                        map[gridY][gridX] = 0;
+                        score += 50;
+                        dots--;
+                        scoreElement.textContent = score;
+                        
+                        // 激活大力丸效果
+                        powerPelletActive = true;
+                        powerPelletTimer = POWER_PELLET_DURATION;
+                        
+                        for (const ghost of ghosts) {
+                            ghost.isScared = true;
+                        }
+                    }
+                    
+                    // 检查是否通关
+                    if (dots === 0) {
+                        levelUp();
+                    }
+                }
+            }
+            
+            // 检查碰撞
+            function checkCollisions() {
+                for (const ghost of ghosts) {
+                    // 计算吃豆人和幽灵之间的距离
+                    const dx = Math.abs(pacman.x - ghost.x);
+                    const dy = Math.abs(pacman.y - ghost.y);
+                    
+                    if (dx < 0.8 && dy < 0.8) {
+                        if (powerPelletActive && ghost.isScared) {
+                            // 吃掉幽灵
+                            score += 200;
+                            scoreElement.textContent = score;
+                            
+                            // 重置幽灵位置
+                            ghost.x = Math.floor(GRID_WIDTH / 2);
+                            ghost.y = Math.floor(GRID_HEIGHT / 2);
+                            ghost.isScared = false;
+                        } else {
+                            // 被幽灵抓到
+                            loseLife();
+                        }
+                    }
+                }
+            }
+            
+            // 升级
+            function levelUp() {
+                level++;
+                levelElement.textContent = level;
+                
+                // 重新加载关卡，增加难度
+                loadLevel();
+                
+                // 增加幽灵速度
+                for (const ghost of ghosts) {
+                    ghost.speed = GHOST_SPEED + (level * 0.1);
+                }
+            }
+            
+            // 失去生命
+            function loseLife() {
+                lives--;
+                livesElement.textContent = lives;
+                
+                if (lives <= 0) {
+                    // 游戏结束
+                    gameOver = true;
+                    gameRunning = false;
+                    alert(`游戏结束! 你的得分: ${score}`);
+                } else {
+                    // 重置吃豆人和幽灵位置
+                    loadLevel();
+                }
+            }
+            
+            // 开始游戏
+            function startGame() {
+                if (!gameRunning && !gameOver) {
+                    gameRunning = true;
+                    startBtn.disabled = true;
+                    pauseBtn.disabled = false;
+                    animationFrameId = requestAnimationFrame(update);
+                }
+            }
+            
+            // 暂停游戏
+            function pauseGame() {
+                if (gameRunning) {
+                    gameRunning = false;
+                    cancelAnimationFrame(animationFrameId);
+                    pauseBtn.textContent = "继续";
+                } else {
+                    gameRunning = true;
+                    pauseBtn.textContent = "暂停";
+                    animationFrameId = requestAnimationFrame(update);
+                }
+            }
+            
+            // 重置游戏
+            function resetGame() {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                }
+                initGame();
+            }
+            
+            // 键盘控制
+            document.addEventListener('keydown', (e) => {
+                if (!gameRunning && e.keyCode !== 32) return;
+                
+                switch(e.keyCode) {
+                    case 37: // Left arrow
+                    case 65: // A
+                        pacman.nextDirection = 'left';
+                        break;
+                    case 39: // Right arrow
+                    case 68: // D
+                        pacman.nextDirection = 'right';
+                        break;
+                    case 38: // Up arrow
+                    case 87: // W
+                        pacman.nextDirection = 'up';
+                        break;
+                    case 40: // Down arrow
+                    case 83: // S
+                        pacman.nextDirection = 'down';
+                        break;
+                    case 32: // Space
+                        if (!gameRunning && !gameOver) {
+                            startGame();
+                        }
+                        break;
+                    case 80: // P key
+                        if (gameRunning || pauseBtn.textContent === "继续") {
+                            pauseGame();
+                        }
+                        break;
+                }
+            });
+            
+            // 移动端控制
+            upBtn.addEventListener('click', () => pacman.nextDirection = 'up');
+            downBtn.addEventListener('click', () => pacman.nextDirection = 'down');
+            leftBtn.addEventListener('click', () => pacman.nextDirection = 'left');
+            rightBtn.addEventListener('click', () => pacman.nextDirection = 'right');
+            
+            // 按钮事件监听
+            startBtn.addEventListener('click', startGame);
+            pauseBtn.addEventListener('click', pauseGame);
+            resetBtn.addEventListener('click', resetGame);
+            
+            // 初始绘制
+            initGame();
+        });
+    </script>
+</body>
+</html>
